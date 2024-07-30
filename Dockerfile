@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev
 
 # Install the necessary R packages
-RUN R -e "install.packages(c('plumber', 'dplyr', 'caret', 'e1071'), repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages(c('plumber', 'dplyr', 'caret'), repos='http://cran.rstudio.com/')"
 
 # Create a directory for the app
 WORKDIR /app
