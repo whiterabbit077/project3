@@ -5,23 +5,183 @@ format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#read libraries and set seed 
+library(tidyverse)
+library(caret)
+library(rpart)
+library(randomForest)
+set.seed(123) # For reproducibility
 ```
 
-You can add options to executable code like this
+# Introduction
+
+In this section, we will build predictive models to identify the likelihood of diabetes in individuals based on various health indicators and demographic variables. We will use logistic regression, classification trees, and random forests to build models and compare their performance using the log-loss metric. The predictors used for modeling are BMI, HighBP, Physical Activity, and General Health. The data will be split into training (70%) and test (30%) sets to evaluate the models.
+
+## Log Loss Metric
+
+Log loss, also known as logistic loss or cross-entropy loss, is a performance metric for evaluating the predictions of a classification model where the predicted output is a probability value between 0 and 1. The log loss increases as the predicted probability diverges from the actual label. It is preferred over accuracy in scenarios with imbalanced classes because it provides a more nuanced measure of how well the predicted probabilities align with the actual outcomes.
+
+## Alternatives to Log Loss
+
+-   **Accuracy**: Measures the proportion of correct predictions out of all predictions but can be misleading with imbalanced datasets.
+-   **Precision, Recall, and F1 Score**: Evaluate the correctness of positive predictions but do not consider probability confidence.
+-   **AUC-ROC**: Assesses the model's ability to distinguish between classes but ignores predicted probability confidence.
+-   **AUC-PR**: Focuses on the trade-off between precision and recall but also ignores predicted probability confidence.
+-   **Brier Score**: Measures the mean squared difference between predicted probabilities and actual outcomes, evaluating probability calibration but less harshly penalizes incorrect predictions than log loss.
+
+# Modelling
+
+## Data Preparation
+
+## Importing Data
 
 ```{r}
-#| echo: false
-2 * 2
+# Importing necessary libraries
+library(dplyr)
+library(readr)
+
+# Use a relative path to import the data
+data <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+
+# Display the first few rows of the dataset
+head(data)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+# Converting binary variables to factors with meaningful level names
+data <- data %>%
+  mutate(
+    Diabetes_binary = factor(Diabetes_binary, levels = c(0, 1), labels = c("No", "Yes")),
+    HighBP = factor(HighBP, levels = c(0, 1), labels = c("No", "Yes")),
+    HighChol = factor(HighChol, levels = c(0, 1), labels = c("No", "Yes")),
+    CholCheck = factor(CholCheck, levels = c(0, 1), labels = c("No", "Yes")),
+    Smoker = factor(Smoker, levels = c(0, 1), labels = c("No", "Yes")),
+    Stroke = factor(Stroke, levels = c(0, 1), labels = c("No", "Yes")),
+    HeartDiseaseorAttack = factor(HeartDiseaseorAttack, levels = c(0, 1), labels = c("No", "Yes")),
+    PhysActivity = factor(PhysActivity, levels = c(0, 1), labels = c("No", "Yes")),
+    Fruits = factor(Fruits, levels = c(0, 1), labels = c("No", "Yes")),
+    Veggies = factor(Veggies, levels = c(0, 1), labels = c("No", "Yes")),
+    HvyAlcoholConsump = factor(HvyAlcoholConsump, levels = c(0, 1), labels = c("No", "Yes")),
+    AnyHealthcare = factor(AnyHealthcare, levels = c(0, 1), labels = c("No", "Yes")),
+    NoDocbcCost = factor(NoDocbcCost, levels = c(0, 1), labels = c("No", "Yes")),
+    DiffWalk = factor(DiffWalk, levels = c(0, 1), labels = c("No", "Yes")),
+    Sex = factor(Sex, levels = c(0, 1), labels = c("Female", "Male"))
+  )
+
+# Converting other variables as appropriate
+data$GenHlth <- factor(data$GenHlth, levels = 1:5, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor"))
+data$Education <- factor(data$Education, levels = 1:6, labels = c("Never attended school", "Elementary", "Some High School", "High School Graduate", "Some College", "College Graduate"))
+data$Income <- factor(data$Income, levels = 1:8, labels = c("Less than $10,000", "$10,000 to $14,999", "$15,000 to $19,999", "$20,000 to $24,999", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 or more"))
+
+# Display the structure of the modified dataset
+str(data)
+
+```
+
+```{r}
+# Selecting only the relevant columns
+data <- data %>%
+  select(Diabetes_binary, BMI, HighBP, PhysActivity, GenHlth)
+```
+
+## Splitting the Data
+
+```{r}
+# Splitting the data into training (70%) and test (30%) sets
+set.seed(123) # For reproducibility
+trainIndex <- createDataPartition(data$Diabetes_binary, p = 0.7, list = FALSE, times = 1)
+trainData <- data[trainIndex, ]
+testData <- data[-trainIndex, ]
+
+```
+
+# Logistic Regression Models
+
+Logistic regression is a statistical method for predicting binary outcomes from data. It estimates the probability that an instance belongs to a particular class based on one or more predictor variables. The model uses a logistic function to output a probability value between 0 and 1.
+
+```{r}
+# Setting up train control for cross-validation
+train_control <- trainControl(method = "cv", number = 5, classProbs = TRUE, summaryFunction = mnLogLoss)
+
+# Fitting logistic regression models
+set.seed(123)
+logit_model <- train(Diabetes_binary ~ BMI + HighBP + PhysActivity + GenHlth, 
+                     data = trainData, 
+                     method = "glm", 
+                     family = "binomial", 
+                     trControl = train_control, 
+                     metric = "logLoss")
+
+print(logit_model)
+
+```
+
+# Classification Tree
+
+A classification tree is a decision tree model used to predict the value of a target variable based on several input variables. It recursively splits the data into subsets based on the value of input variables, resulting in a tree-like model of decisions.
+
+```{r}
+# Fitting a classification tree model
+set.seed(123)
+tree_model <- train(Diabetes_binary ~ BMI + HighBP + PhysActivity + GenHlth, 
+                    data = trainData, 
+                    method = "rpart", 
+                    trControl = train_control, 
+                    metric = "logLoss", 
+                    tuneLength = 10)
+
+print(tree_model)
+
+```
+
+# Random Forest
+
+A random forest is an ensemble learning method that constructs multiple decision trees during training and outputs the class that is the mode of the classes of the individual trees. It reduces the risk of overfitting and improves predictive accuracy.
+
+```{r}
+# Fitting a random forest model
+set.seed(123)
+rf_model <- train(Diabetes_binary ~ BMI + HighBP, # + PhysActivity + GenHlth, #will simplyfy this model otherwise I can't get this to finish rendering in reasonable time ;/
+                  data = trainData, 
+                  method = "rf", 
+                  trControl = train_control, 
+                  metric = "logLoss", 
+                  tuneLength = 10)
+
+print(rf_model)
+
+```
+
+# Final Model Selection
+
+```{r}
+# Predicting probabilities for each model on the test set
+logit_pred <- predict(logit_model, newdata = testData, type = "prob")
+tree_pred <- predict(tree_model, newdata = testData, type = "prob")
+rf_pred <- predict(rf_model, newdata = testData, type = "prob")
+
+# Ensuring the predicted probabilities and actual outcomes have consistent levels
+testData$Diabetes_binary <- factor(testData$Diabetes_binary, levels = c("No", "Yes"))
+
+# Calculating log loss for each model
+logit_logLoss <- mnLogLoss(data.frame(obs = testData$Diabetes_binary, logit_pred), lev = levels(testData$Diabetes_binary))
+tree_logLoss <- mnLogLoss(data.frame(obs = testData$Diabetes_binary, tree_pred), lev = levels(testData$Diabetes_binary))
+rf_logLoss <- mnLogLoss(data.frame(obs = testData$Diabetes_binary, rf_pred), lev = levels(testData$Diabetes_binary))
+
+# Comparing the results
+results <- data.frame(
+  Model = c("Logistic Regression", "Classification Tree", "Random Forest"),
+  LogLoss = c(logit_logLoss, tree_logLoss, rf_logLoss)
+)
+
+print(results)
+
+# Selecting the overall best model
+best_model <- results[which.min(results$LogLoss), "Model"]
+best_model
+
+
+```
+Logistic Regression seems to be the best model.

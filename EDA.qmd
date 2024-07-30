@@ -211,4 +211,4 @@ The plot indicated that individuals with poorer general health are more likely t
 
 These visualizations and summaries provide a comprehensive view of the data and highlight key factors associated with diabetes, which will inform the subsequent modeling process to predict diabetes based on these health indicators and demographic factors.
 
-<https://quarto.org>.
+Modeling.html <https://whiterabbit077.github.io/project3/Modelling.html>.
