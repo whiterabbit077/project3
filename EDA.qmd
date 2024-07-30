@@ -1,0 +1,130 @@
+---
+title: "EDA"
+author: "Anna Giczewska"
+format: html
+editor: visual
+---
+
+# Introduction
+
+This project involves the exploration and analysis of a health-related data set to understand the factors associated with diabetes. The data set comprises several health indicators and demographic variables that could potentially influence the incidence of diabetes. The primary goal is to perform an Exploratory Data Analysis (EDA) to uncover patterns, relationships, and insights, which will subsequently aid in building predictive models.
+
+## Dataset Description
+
+The dataset includes the following variables:
+
+## Dataset Description
+
+| Variable                 | Description                                                                                                                 |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **Diabetes_binary**      | This is the response variable indicating whether an individual has diabetes (1) or not (0).                                 |
+| **HighBP**               | A binary variable indicating if the individual has high blood pressure (1) or not (0).                                      |
+| **HighChol**             | A binary variable indicating if the individual has high cholesterol (1) or not (0).                                         |
+| **CholCheck**            | A binary variable indicating if the individual has had a cholesterol check (1) or not (0).                                  |
+| **BMI**                  | Body Mass Index, a numerical value representing the individual's body mass.                                                 |
+| **Smoker**               | A binary variable indicating if the individual is a smoker (1) or not (0).                                                  |
+| **Stroke**               | A binary variable indicating if the individual has had a stroke (1) or not (0).                                             |
+| **HeartDiseaseorAttack** | A binary variable indicating if the individual has had heart disease or a heart attack (1) or not (0).                      |
+| **PhysActivity**         | A binary variable indicating if the individual engages in physical activity (1) or not (0).                                 |
+| **Fruits**               | A binary variable indicating if the individual consumes fruits regularly (1) or not (0).                                    |
+| **Veggies**              | A binary variable indicating if the individual consumes vegetables regularly (1) or not (0).                                |
+| **HvyAlcoholConsump**    | A binary variable indicating if the individual consumes alcohol heavily (1) or not (0).                                     |
+| **AnyHealthcare**        | A binary variable indicating if the individual has access to any form of healthcare (1) or not (0).                         |
+| **NoDocbcCost**          | A binary variable indicating if the individual has not seen a doctor due to cost (1) or not (0).                            |
+| **GenHlth**              | A numerical variable indicating the individual's general health on a scale from 1 to 5.                                     |
+| **MentHlth**             | A numerical variable representing the number of days the individual has experienced poor mental health in the past month.   |
+| **PhysHlth**             | A numerical variable representing the number of days the individual has experienced poor physical health in the past month. |
+| **DiffWalk**             | A binary variable indicating if the individual has difficulty walking (1) or not (0).                                       |
+| **Sex**                  | A binary variable indicating the sex of the individual (1 for male, 0 for female).                                          |
+| **Age**                  | A numerical variable indicating the age of the individual.                                                                  |
+| **Education**            | A numerical variable representing the highest level of education attained by the individual.                                |
+| **Income**               | A numerical variable indicating the income level of the individual.                                                         |
+
+## Purpose of EDA
+
+The Exploratory Data Analysis (EDA) will focus on understanding the distribution and relationships between the variables in the dataset. The key objectives include:
+
+#### Descriptive Statistics:
+
+Summarizing the main features of the dataset, including central tendencies and variances.
+
+#### Data Visualization:
+
+Creating visual representations to identify patterns, trends, and outliers.
+
+#### Correlation Analysis:
+
+Investigating the relationships between the predictor variables and the response variable (Diabetes_binary).
+
+#### Identification of Key Factors:
+
+Determining which factors are most strongly associated with diabetes.
+
+### Ultimate Goal
+
+The ultimate goal of this project is to develop a predictive model that can accurately classify individuals as diabetic or non-diabetic based on the available health indicators and demographic factors. The insights gained from the EDA will guide the feature selection and modeling process, enhancing the model's predictive performance and interpretability.
+
+# Data
+
+## Importing Data
+
+```{r}
+# Importing necessary libraries
+library(dplyr)
+library(readr)
+
+# Use a relative path to import the data
+data <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+
+# Display the first few rows of the dataset
+head(data)
+
+```
+
+## Converting Variables to Factors
+
+```{r}
+# Converting binary variables to factors with meaningful level names
+data <- data %>%
+  mutate(
+    Diabetes_binary = factor(Diabetes_binary, levels = c(0, 1), labels = c("No", "Yes")),
+    HighBP = factor(HighBP, levels = c(0, 1), labels = c("No", "Yes")),
+    HighChol = factor(HighChol, levels = c(0, 1), labels = c("No", "Yes")),
+    CholCheck = factor(CholCheck, levels = c(0, 1), labels = c("No", "Yes")),
+    Smoker = factor(Smoker, levels = c(0, 1), labels = c("No", "Yes")),
+    Stroke = factor(Stroke, levels = c(0, 1), labels = c("No", "Yes")),
+    HeartDiseaseorAttack = factor(HeartDiseaseorAttack, levels = c(0, 1), labels = c("No", "Yes")),
+    PhysActivity = factor(PhysActivity, levels = c(0, 1), labels = c("No", "Yes")),
+    Fruits = factor(Fruits, levels = c(0, 1), labels = c("No", "Yes")),
+    Veggies = factor(Veggies, levels = c(0, 1), labels = c("No", "Yes")),
+    HvyAlcoholConsump = factor(HvyAlcoholConsump, levels = c(0, 1), labels = c("No", "Yes")),
+    AnyHealthcare = factor(AnyHealthcare, levels = c(0, 1), labels = c("No", "Yes")),
+    NoDocbcCost = factor(NoDocbcCost, levels = c(0, 1), labels = c("No", "Yes")),
+    DiffWalk = factor(DiffWalk, levels = c(0, 1), labels = c("No", "Yes")),
+    Sex = factor(Sex, levels = c(0, 1), labels = c("Female", "Male"))
+  )
+
+# Converting other variables as appropriate
+data$GenHlth <- factor(data$GenHlth, levels = 1:5, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor"))
+data$Education <- factor(data$Education, levels = 1:6, labels = c("Never attended school", "Elementary", "Some High School", "High School Graduate", "Some College", "College Graduate"))
+data$Income <- factor(data$Income, levels = 1:8, labels = c("Less than $10,000", "$10,000 to $14,999", "$15,000 to $19,999", "$20,000 to $24,999", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 or more"))
+
+# Display the structure of the modified dataset
+str(data)
+
+```
+
+## Checking for Missing Data
+
+```{r}
+# Checking for missing values
+missing_data <- sapply(data, function(x) sum(is.na(x)))
+
+# Display the number of missing values for each variable
+missing_data
+
+```
+
+No missing data present in our dataset.
+
+<https://quarto.org>.
