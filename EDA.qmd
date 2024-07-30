@@ -16,7 +16,7 @@ The dataset includes the following variables:
 ## Dataset Description
 
 | Variable                 | Description                                                                                                                 |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+|---------------------|---------------------------------------------------|
 | **Diabetes_binary**      | This is the response variable indicating whether an individual has diabetes (1) or not (0).                                 |
 | **HighBP**               | A binary variable indicating if the individual has high blood pressure (1) or not (0).                                      |
 | **HighChol**             | A binary variable indicating if the individual has high cholesterol (1) or not (0).                                         |
@@ -126,5 +126,89 @@ missing_data
 ```
 
 No missing data present in our dataset.
+
+# EDA
+
+Read libraries
+
+```{r}
+library(ggplot2)
+library(summarytools)
+library(gridExtra)
+```
+
+## Summary Statistics
+
+```{r}
+# Summary statistics for numerical variables
+numerical_summary <- data %>%
+  select(BMI, MentHlth, PhysHlth, Age) %>%
+  summarytools::descr(stats = c("mean", "sd", "min", "max"))
+
+numerical_summary
+
+# Summary statistics for categorical variables
+categorical_summary <- data %>%
+  select(Diabetes_binary, HighBP, HighChol, CholCheck, Smoker, Stroke, HeartDiseaseorAttack, PhysActivity, Fruits, Veggies, HvyAlcoholConsump, AnyHealthcare, NoDocbcCost, DiffWalk, Sex, GenHlth, Education, Income) %>%
+  summarytools::freq()
+
+categorical_summary
+
+```
+
+The summary statistics provided insights into the central tendencies and variances of the numerical variables, such as BMI, Mental Health, Physical Health, and Age. The frequency tables for categorical variables showed the distribution of individuals across different health conditions and demographics.
+
+
+## Visualizations
+
+### Distribution of BMI
+
+```{r}
+ggplot(data, aes(x = BMI)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  theme_minimal() +
+  labs(title = "Distribution of BMI", x = "BMI", y = "Count")
+
+```
+
+The histogram of BMI indicates that most individuals have a BMI between 20 and 40, with a peak around the 25-30 range. This suggests a concentration of individuals within the overweight and obese categories.
+
+### Diabetes by HighBP
+
+```{r}
+ggplot(data, aes(x = HighBP, fill = Diabetes_binary)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  labs(title = "Diabetes by High Blood Pressure", x = "High Blood Pressure", y = "Count")
+
+```
+
+The bar plot revealed that individuals with high blood pressure are more likely to have diabetes. This aligns with medical literature that high blood pressure is a significant risk factor for diabetes.
+
+### Diabetes by Physical Activity
+
+```{r}
+ggplot(data, aes(x = PhysActivity, fill = Diabetes_binary)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  labs(title = "Diabetes by Physical Activity", x = "Physical Activity", y = "Count")
+
+```
+
+The analysis showed that individuals who do not engage in physical activity have a higher prevalence of diabetes. This highlights the importance of physical activity in preventing diabetes.
+
+### Diabetes by General Health
+
+```{r}
+ggplot(data, aes(x = GenHlth, fill = Diabetes_binary)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  labs(title = "Diabetes by General Health", x = "General Health", y = "Count")
+
+```
+
+The plot indicated that individuals with poorer general health are more likely to have diabetes. This suggests a strong relationship between overall health and the risk of diabetes.
+
+These visualizations and summaries provide a comprehensive view of the data and highlight key factors associated with diabetes, which will inform the subsequent modeling process to predict diabetes based on these health indicators and demographic factors.
 
 <https://quarto.org>.
