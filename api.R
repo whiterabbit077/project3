@@ -55,7 +55,7 @@ function(BMI = mean(trainData$BMI, na.rm = TRUE),
 function() {
   list(
     name = "Anna Giczewska",
-    github_page = "https://github.com/whiterabbit077/project3"
+    github_page = "https://github.com/whiterabbit077/project3/deployments/github-pages"
   )
 }
 
