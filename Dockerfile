@@ -14,7 +14,7 @@ RUN R -e "install.packages(c('plumber', 'dplyr', 'caret'), repos='http://cran.rs
 WORKDIR /app
 
 # Copy the dataset and API script into the Docker image
-COPY data.csv /app/data.csv
+COPY diabetes_binary_health_indicators_BRFSS2015.csv /app/diabetes_binary_health_indicators_BRFSS2015.csv
 COPY api.R /app/api.R
 
 # Expose the port the API will run on
